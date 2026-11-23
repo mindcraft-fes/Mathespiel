@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gipfelsturm Kopfrechnen</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* VOICE: fröhlich, ermutigend, ein Bergabenteuer für Viertklässler
+   IDEA: eine Gipfel-Expedition – jede richtige Antwort sind Höhenmeter
+   PICTURE: großer Berg mit Kletterpfad; der Kletterer steigt live, der Rekord steht als Fahne auf dem Gipfel
+   COLOUR and TYPE: Himmelblau dominant, Fels-Schiefer als Stütze, Sonnengelb und Signalrot als Akzent; Baloo 2
+   LAYOUT: Berg oben, darunter Spielfläche mit großem Ziffernblock; Start: Spieler, Modus, Zeit links, Rang und Bestenliste rechts */
+:root{color-scheme:light dark;
+--sky:light-dark(#7fd3f7,#0f2a4a);--sky2:light-dark(#d9f3ff,#1d4570);
+--bg:light-dark(#eaf8ff,#0b1d33);--card:light-dark(#ffffff,#13304f);--ink:light-dark(#12263a,#eef6ff);--mute:light-dark(#4d6378,#a9c1d8);
+--rock:light-dark(#4f6680,#3a5574);--rock2:light-dark(#71889f,#4c6a8b);--snow:light-dark(#ffffff,#dfeaf5);
+--sun:#ffb627;--red:#ff4d5a;--good:#2fbf71;--line:light-dark(#d3e6f2,#24476d)}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 "Baloo 2",system-ui,sans-serif;overflow-x:clip}
+button{font:inherit;color:inherit;cursor:pointer;border:0;border-radius:16px;min-height:44px}
+button:focus-visible,input:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.top{background:linear-gradient(var(--sky),var(--sky2));position:relative}
+.bar{max-width:1100px;margin:0 auto;padding:14px max(4vw,14px) 0;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:clamp(30px,5vw,46px);line-height:1.05;font-weight:800;color:#0e2a45}
+:root[data-theme=dark] h1{color:#fff}@media(prefers-color-scheme:dark){:root:not([data-theme=light]) h1{color:#fff}}
+.sub{margin:0;color:#21486b;font-weight:600}
+:root[data-theme=dark] .sub{color:#bcd7f0}@media(prefers-color-scheme:dark){:root:not([data-theme=light]) .sub{color:#bcd7f0}}
+.grow{flex:1}
+.snd{background:rgba(255,255,255,.55);padding:0 16px;font-weight:700}
+.mtn{display:block;width:100%;height:clamp(170px,26vw,250px)}
+.hud{position:absolute;left:0;right:0;top:12px;display:none;justify-content:center;gap:10px;flex-wrap:wrap;padding:0 12px}
+.pill{background:var(--card);border-radius:999px;padding:6px 16px;font-weight:800;font-size:20px;box-shadow:0 3px 0 rgba(0,0,0,.12);white-space:nowrap}
+.pill small{font-weight:600;color:var(--mute);font-size:14px;margin-right:4px}
+main{max-width:1100px;margin:0 auto;padding:18px max(4vw,14px) 40px}
+.screen{display:none}.screen.on{display:block}
+.grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:18px}
+@media(max-width:860px){.grid{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--card);border-radius:22px;padding:18px;box-shadow:0 4px 0 var(--line)}
+h2{margin:0 0 10px;font-size:24px;line-height:1.1}
+h3{margin:14px 0 8px;font-size:18px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--bg);padding:0 16px;font-weight:700;border:2px solid var(--line)}
+.chip.on{background:var(--sun);border-color:var(--sun);color:#2a1a00}
+.add{display:flex;gap:8px;margin-top:10px}
+.add input{flex:1;font:inherit;font-size:16px;padding:8px 12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);color:var(--ink);min-height:44px}
+.modes{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.mode{background:var(--bg);border:2px solid var(--line);text-align:left;padding:10px 12px;display:flex;flex-direction:column;gap:2px}
+.mode b{font-size:18px;line-height:1.15}.mode span{font-size:14px;color:var(--mute);line-height:1.25}
+.mode .ex{font-weight:700;color:var(--ink);font-size:15px}
+.mode.on{border-color:var(--rock);background:var(--rock);color:#fff}.mode.on span,.mode.on .ex{color:#e6f0fa}
+.go{width:100%;margin-top:16px;background:var(--red);color:#fff;font-size:28px;font-weight:800;min-height:64px;box-shadow:0 5px 0 #c92d39}
+.go:active{transform:translateY(3px);box-shadow:0 2px 0 #c92d39}
+.rank{display:flex;gap:14px;align-items:center}
+.badge{width:64px;height:64px;border-radius:50%;background:var(--sun);display:grid;place-items:center;font-weight:800;font-size:26px;color:#2a1a00;flex:none;box-shadow:inset 0 -5px 0 rgba(0,0,0,.15)}
+.prog{height:14px;background:var(--bg);border-radius:9px;overflow:hidden;margin-top:6px;border:2px solid var(--line)}
+.prog i{display:block;height:100%;background:linear-gradient(90deg,var(--sun),var(--red));border-radius:9px;transition:width .6s}
+.mute{color:var(--mute);font-size:15px}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px}
+.tab{background:var(--bg);padding:0 12px;font-weight:700;font-size:15px;flex:none;min-height:40px}
+.tab.on{background:var(--rock);color:#fff}
+table{width:100%;border-collapse:collapse;margin-top:8px}
+td{padding:7px 4px;border-bottom:2px solid var(--line)}
+td.n{text-align:right;font-weight:800;white-space:nowrap}td.m{width:36px;font-size:20px}
+tr.me td{background:color-mix(in srgb,var(--sun) 25%,transparent)}
+.medal{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;font-weight:800;font-size:14px;color:#2a1a00}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.bdg{font-size:14px;padding:4px 10px;border-radius:999px;background:var(--bg);color:var(--mute);border:2px dashed var(--line);font-weight:700}
+.bdg.got{background:var(--good);color:#fff;border:2px solid var(--good)}
+/* play */
+.play{max-width:620px;margin:0 auto;text-align:center}
+.task{font-size:clamp(34px,8vw,58px);font-weight:800;line-height:1.1;margin:6px 0 2px;display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:.25em}
+.ans{display:inline-block;min-width:3.2em;padding:0 .2em;border-bottom:6px solid var(--sun);color:var(--red);min-height:1.15em}
+.hint{color:var(--mute);font-size:16px;min-height:24px}
+.pad{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}
+.pad button{background:var(--card);font-size:32px;font-weight:800;min-height:68px;box-shadow:0 5px 0 var(--line)}
+.pad button:active{transform:translateY(3px);box-shadow:0 2px 0 var(--line)}
+.pad .ok{background:var(--good);color:#fff;box-shadow:0 5px 0 #1f8a51}
+.pad .del{background:var(--bg)}
+.combo{height:30px;font-weight:800;font-size:20px;color:var(--red)}
+.fb{position:relative;height:0}
+.float{position:absolute;left:50%;top:-40px;transform:translateX(-50%);font-weight:800;font-size:32px;color:var(--good);pointer-events:none;animation:up 1s ease-out forwards;white-space:nowrap}
+@keyframes up{to{transform:translate(-50%,-70px);opacity:0}}
+.shake{animation:shake .4s}@keyframes shake{25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+.wrongbox{background:color-mix(in srgb,var(--red) 18%,var(--card));border-radius:16px;padding:10px;font-weight:600;margin-top:8px;display:none;font-size:18px}
+.quit{background:transparent;color:var(--mute);margin-top:14px;font-size:15px;text-decoration:underline}
+/* result */
+.res{max-width:760px;margin:0 auto;text-align:center}
+.stars{font-size:64px;letter-spacing:8px;color:var(--line);line-height:1}.stars .s{color:var(--sun);display:inline-block;animation:pop .5s backwards}
+@keyframes pop{from{transform:scale(0) rotate(-40deg)}}
+.big{font-size:clamp(48px,10vw,80px);font-weight:800;line-height:1;margin:8px 0 0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:16px 0}
+.stat{background:var(--bg);border-radius:16px;padding:10px}.stat b{display:block;font-size:28px;line-height:1.1}
+.banner{background:var(--sun);color:#2a1a00;border-radius:16px;padding:10px;font-weight:800;font-size:22px;margin:10px 0;animation:pop .5s}
+.wl{text-align:left;margin:0;padding-left:20px}.wl li{margin:4px 0}
+.row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+.row button{padding:0 24px;font-size:20px;font-weight:800}
+.b1{background:var(--red);color:#fff;box-shadow:0 5px 0 #c92d39}.b2{background:var(--card);box-shadow:0 5px 0 var(--line)}
+body.playing .bar .grow{visibility:hidden}
+#fx{position:fixed;inset:0;pointer-events:none;z-index:50;width:100%;height:100%}
+.note{font-size:13px;color:var(--mute);margin-top:10px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="bar">
+    <div class="grow"><h1>Gipfelsturm</h1><p class="sub">Kopfrechnen bis 100 000 – jede Aufgabe ist ein Schritt zum Gipfel</p></div>
+    <button class="snd" id="snd" aria-pressed="true">Ton an</button>
+  </div>
+  <div class="hud" id="hud">
+    <div class="pill"><small>Aufgabe</small><span id="hTime">60</span></div>
+    <div class="pill"><small>Höhe</small><span id="hScore">0 m</span></div>
+    <div class="pill"><small>Serie</small><span id="hStreak">0</span></div>
+  </div>
+  <svg class="mtn" id="mtn" viewBox="0 0 1000 250" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <defs>
+      <linearGradient id="gR" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="var(--rock2)"/><stop offset="1" stop-color="var(--rock)"/></linearGradient>
+      <linearGradient id="gF" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5cc27a"/><stop offset="1" stop-color="#2f9c58"/></linearGradient>
+    </defs>
+    <circle cx="140" cy="60" r="34" fill="var(--sun)" opacity=".9"/>
+    <path d="M0 250 L120 150 L210 190 L330 110 L430 170 L520 130 L600 250Z" fill="var(--rock2)" opacity=".55"/>
+    <path d="M520 250 L640 120 L700 160 L780 40 L870 140 L940 110 L1000 150 L1000 250Z" fill="url(#gR)"/>
+    <path d="M780 40 L748 88 L768 82 L782 96 L798 80 L816 90Z" fill="var(--snow)"/>
+    <path d="M200 250 L360 160 L470 205 L560 150 L660 250Z" fill="url(#gR)" opacity=".85"/>
+    <path d="M0 250 Q160 200 330 228 T700 222 T1000 232 V250 H0Z" fill="url(#gF)"/>
+    <path id="trail" d="M60 238 C180 232 260 226 360 214 S520 196 600 176 S700 140 720 112 S760 70 780 44" fill="none" stroke="#fff" stroke-width="4" stroke-dasharray="2 10" stroke-linecap="round" opacity=".9"/>
+    <g id="flag" transform="translate(780 44)"><line x1="0" y1="0" x2="0" y2="-34" stroke="#12263a" stroke-width="3"/><path d="M0 -34 L26 -27 L0 -20Z" fill="var(--red)"/></g>
+    <text id="flagT" x="800" y="22" font-size="18" font-weight="800" fill="#12263a"></text>
+    <g id="climber"><circle r="13" fill="var(--sun)" stroke="#12263a" stroke-width="3"/><circle r="4" cy="-2" fill="#12263a"/></g>
+    <text id="climbT" font-size="18" font-weight="800" fill="#fff" stroke="#12263a" stroke-width="4" paint-order="stroke"></text>
+  </svg>
+</div>
+
+<main>
+<section class="screen on" id="sStart">
+  <div class="grid">
+    <div class="card">
+      <h2>Wer klettert?</h2>
+      <div class="chips" id="players"></div>
+      <form class="add" id="addF"><input id="addN" maxlength="16" placeholder="Neuer Name" aria-label="Neuer Spielername"><button class="chip" type="submit">Dazu</button></form>
+      <h3>Welche Route?</h3>
+      <div class="modes" id="modes"></div>
+      <h3>Wie viele Aufgaben bis zum Gipfel?</h3>
+      <div class="chips" id="durs"></div>
+      <button class="go" id="go">Los geht's!</button>
+      <p class="note" id="saveNote">Ergebnisse werden gespeichert …</p>
+    </div>
+    <div>
+      <div class="card" id="rankCard"></div>
+      <div class="card" style="margin-top:18px">
+        <h2>Bestenliste <span class="mute" id="bN"></span></h2>
+        <div class="tabs" id="tabs"></div>
+        <div id="board"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="screen" id="sPlay">
+  <div class="play">
+    <div class="combo" id="combo"></div>
+    <div class="task" id="task"></div>
+    <div class="hint" id="hint"></div>
+    <div class="fb" id="fb"></div>
+    <div class="wrongbox" id="wrong"></div>
+    <div class="pad" id="pad"></div>
+    <button class="quit" id="quit">Runde abbrechen</button>
+  </div>
+</section>
+
+<section class="screen" id="sRes">
+  <div class="res card" id="resBox"></div>
+</section>
+</main>
+<canvas id="fx"></canvas>
+
+<script>
+{
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const fmt=n=>Number(n).toLocaleString("de-DE").replace(/\./g," ");
+const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+const pick=a=>a[R(0,a.length-1)];
+
+/* ---------- Aufgaben ---------- */
+const Q="§";
+function analogie(){const a=R(10000,89999),k=R(0,4),dig=Math.floor(a/10**k)%10;let plus=Math.random()<.5;if(plus&&dig===9)plus=false;if(!plus&&dig===0)plus=true;const d=plus?R(1,9-dig):R(1,dig),b=d*10**k;return{t:`${fmt(a)} ${plus?"+":"−"} ${fmt(b)} = ${Q}`,ans:plus?a+b:a-b,hint:"Nur eine Stelle ändert sich."}}
+function uebergang(){const typ=R(0,2),plus=Math.random()<.5;let a,b;
+ if(typ===0){if(plus){const h=R(2,9);a=R(1,98)*1000+h*100;b=R(10-h,9)*100}else{const h=R(0,7);a=R(2,99)*1000+h*100;b=R(h+1,9)*100}}
+ else if(typ===1){if(plus){const t=R(2,9);a=R(10,998)*100+t*10;b=R(10-t,9)*10}else{const t=R(0,7);a=R(11,999)*100+t*10;b=R(t+1,9)*10}}
+ else{if(plus){const e=R(2,9);a=R(100,9998)*10+e;b=R(10-e,9)}else{const e=R(0,7);a=R(101,9999)*10+e;b=R(e+1,9)}}
+ return{t:`${fmt(a)} ${plus?"+":"−"} ${fmt(b)} = ${Q}`,ans:plus?a+b:a-b,hint:"Erst bis zur vollen Zahl, dann den Rest."}}
+function ergaenzen(){const typ=R(0,2);let tg,x;
+ if(typ===0){tg=R(2,99)*1000;x=R(1,9)*100+R(0,9)*10}else if(typ===1){tg=R(2,10)*10000;x=R(1,9)*1000+R(0,9)*100}else{tg=100000;x=R(1,99)*1000}
+ const a=tg-x;return Math.random()<.7?{t:`${fmt(a)} + ${Q} = ${fmt(tg)}`,ans:x,hint:"Spring bis zur vollen Zahl."}:{t:`${fmt(tg)} − ${Q} = ${fmt(a)}`,ans:x,hint:"Wie weit ist es bis zur vollen Zahl?"}}
+function stellen(){if(Math.random()<.3){const P=[["ZT",10000],["T",1000],["H",100],["Z",10],["E",1]];let parts=P.map(x=>[x[0],x[1],x[0]==="ZT"?R(1,9):Math.random()<.25?0:R(1,9)]).filter(x=>x[2]>0);
+  const ans=parts.reduce((a,x)=>a+x[1]*x[2],0);if(Math.random()<.35)parts=parts.sort(()=>Math.random()-.5);
+  return{t:parts.map(x=>`${x[2]} ${x[0]}`).join(" ")+` = ${Q}`,ans,hint:"Fehlt eine Stelle? Dann schreib eine 0."}}
+ const u=pick([["H",100,10,999],["T",1000,10,99],["Z",10,10,999]]),n=R(u[2],u[3]);
+ return Math.random()<.65?{t:`${n} ${u[0]} = ${Q}`,ans:n*u[1],hint:`Letzte Ziffer in die ${u[0]}-Spalte.`}:{t:`${fmt(n*u[1])} = ${Q} ${u[0]}`,ans:n,hint:`Wie viele ${u[0]==="H"?"Hunderter":u[0]==="T"?"Tausender":"Zehner"}?`}}
+function laengen(){const typ=R(0,5);
+ if(typ===0){const km=R(1,20),m=Math.random()<.5?R(1,99):R(100,999);return{t:`${km} km ${m} m = ${Q} m`,ans:km*1000+m,hint:"1 km = 1 000 m. Denk an die Null!"}}
+ if(typ===1){const km=R(1,20),m=R(1,999);return{t:`${km},${String(m).padStart(3,"0")} km = ${Q} m`,ans:km*1000+m,hint:"Nach dem Komma stehen die Meter."}}
+ if(typ===2){const cm=R(1,99),mm=R(1,9);return Math.random()<.5?{t:`${cm} cm ${mm} mm = ${Q} mm`,ans:cm*10+mm,hint:"1 cm = 10 mm"}:{t:`${cm},${mm} cm = ${Q} mm`,ans:cm*10+mm,hint:"1 cm = 10 mm"}}
+ if(typ===3){const m=R(1,99)*10;return{t:`${m} m + ${Q} m = 1 km`,ans:1000-m,hint:"1 km = 1 000 m"}}
+ if(typ===4){const v=R(10,99)*10+R(1,9);return{t:`${Math.floor(v/10)} cm ${v%10} mm + ${Q} mm = 1 m`,ans:1000-v,hint:"1 m = 1 000 mm"}}
+ const m=R(1,20),cm=R(1,99);return{t:`${m} m ${cm} cm = ${Q} cm`,ans:m*100+cm,hint:"1 m = 100 cm"}}
+function doppelt(){const base=()=>pick([R(1,49)*1000+R(0,9)*100,R(11,499)*100,R(101,4999)*10]);const typ=R(0,3);
+ if(typ===0){const a=base();return{t:`Das Doppelte von ${fmt(a)} = ${Q}`,ans:2*a,hint:"Verdoppeln: die Zahl + dieselbe Zahl."}}
+ if(typ===1){const a=base();return{t:`${fmt(a)} · 2 = ${Q}`,ans:2*a,hint:"Erst die Tausender, dann den Rest verdoppeln."}}
+ const a=base();return{t:`Die Hälfte von ${fmt(2*a)} = ${Q}`,ans:a,hint:"Halbieren: in zwei gleiche Teile."}}
+const MODES=[
+ {id:"analogie",name:"Stellen-Sprung",desc:"Nur eine Stelle ändert sich",ex:"45 300 + 2 000",base:10,gen:analogie},
+ {id:"uebergang",name:"Über die Hürde",desc:"Rechnen mit Übergang",ex:"5 600 + 800",base:15,gen:uebergang},
+ {id:"ergaenzen",name:"Lückenfüller",desc:"Ergänzen bis zur vollen Zahl",ex:"72 500 + ? = 80 000",base:15,gen:ergaenzen},
+ {id:"stellen",name:"Bündel-Profi",desc:"Hunderter, Tausender, Zehner",ex:"608 H = ?",base:15,gen:stellen},
+ {id:"laengen",name:"Längen-Weg",desc:"km, m, cm und mm",ex:"5 km 90 m = ? m",base:15,gen:laengen},
+ {id:"doppelt",name:"Doppelt & Halb",desc:"Verdoppeln und halbieren",ex:"Doppelte von 4 300",base:15,gen:doppelt},
+ {id:"mix",name:"Gipfel-Mix",desc:"Alles gemischt, mehr Punkte",ex:"Profi-Route",base:20,gen:()=>pick([analogie,uebergang,ergaenzen,stellen,laengen,doppelt])()}];
+const RANKS=[[0,"Wanderer"],[300,"Bergwanderer"],[1000,"Kletterer"],[2500,"Bergsteiger"],[5000,"Gipfelstürmer"],[9000,"Bergführer"],[15000,"Expeditionsleiter"],[25000,"Zahlen-Legende"]];
+const BADGES=[["first","Erste Tour"],["s10","10er-Serie"],["s20","20er-Serie"],["perfect","Fehlerfrei"],["blitz","Blitz (5× unter 3 s)"],["all","Alle Routen"],["record","Rekordjäger"],["k1000","1 000 m in einer Runde"]];
+const rankOf=xp=>{let i=0;RANKS.forEach((r,j)=>{if(xp>=r[0])i=j});return i};
+
+/* ---------- Speicher ---------- */
+const S={players:{},scores:[]};let db=null,cur=null,mode="analogie",dur=20,tab="analogie",sound=true;
+try{const l=JSON.parse(localStorage.getItem("gipfel")||"{}");if(l.players)Object.assign(S,l);cur=localStorage.getItem("gipfelCur")}catch(e){}
+const saveLocal=()=>{try{localStorage.setItem("gipfel",JSON.stringify(S));localStorage.setItem("gipfelCur",cur||"")}catch(e){}};
+const note=t=>{$("#saveNote").textContent=t};
+let backend="local";
+const hasGas=()=>window.google&&google.script&&google.script.run;
+function gasLoad(){google.script.run.withSuccessHandler(d=>{if(!d)return;S.players={...S.players,...d.players};S.scores=d.scores||[];
+  note("Rangliste aus Google Tabellen – aktualisiert um "+new Date().toLocaleTimeString("de-DE",{hour:"2-digit",minute:"2-digit"})+" Uhr.");if($("#sStart").classList.contains("on"))renderStart()})
+ .withFailureHandler(()=>note("Rangliste gerade nicht erreichbar – versuche es gleich noch einmal.")).getData()}
+async function connect(){
+ if(hasGas()){backend="gas";note("Lade Rangliste …");gasLoad();setInterval(()=>{if(!G)gasLoad()},15000);return}
+ try{db=window.claude&&claude.use?await claude.use("db"):null}catch(e){db=null}
+ if(!db){note("Ergebnisse werden in diesem Browser gespeichert.");return}
+ backend="db";note("Verbinde mit der Bestenliste …");
+ const timer=setTimeout(()=>note("Bestenliste gerade nicht erreichbar – gespeichert wird trotzdem."),10000);
+ let mig=false;
+ db.collection("players").onSnapshot(s=>{clearTimeout(timer);
+  if(!mig&&!s.metadata.fromCache&&s.empty&&Object.keys(S.players).length){mig=true;Object.keys(S.players).forEach(id=>savePlayer(id));return}
+  mig=true;const p={};s.docs.forEach(d=>p[d.id]=d.data());
+  if(s.docs.length||!s.metadata.fromCache){S.players=p;if(cur&&!p[cur])cur=null;note("Ergebnisse werden dauerhaft gespeichert – auf jedem Gerät.");renderStart()}},()=>{db=null;note("Ergebnisse werden in diesem Browser gespeichert.")});
+ db.collection("scores").orderBy("score","desc").limit(500).onSnapshot(s=>{S.scores=s.docs.map(d=>d.data());renderBoard()},()=>{});
+}
+async function savePlayer(id){saveLocal();
+ if(backend==="gas"){google.script.run.withFailureHandler(()=>note("Speichern hat nicht geklappt.")).savePlayer(id,JSON.stringify(S.players[id]));return}
+ if(!db)return;try{await db.doc("players/"+id).set({...S.players[id]})}catch(e){note("Speichern hat nicht geklappt.")}}
+async function saveScore(r){S.scores.push(r);saveLocal();
+ if(backend==="gas"){google.script.run.withSuccessHandler(gasLoad).saveScore(JSON.stringify(r));return}
+ if(!db)return;try{await db.collection("scores").add(r)}catch(e){}}
+
+/* ---------- Ton ---------- */
+let ac=null;
+function tone(fs,len=.12,type="triangle",vol=.18){if(!sound)return;try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();fs.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain(),t=ac.currentTime+i*len;o.type=type;o.frequency.value=f;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+len*1.6);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+len*1.7)})}catch(e){}}
+const sGood=()=>tone([660,880]),sBad=()=>tone([220,165],.16,"sawtooth",.08),sCombo=()=>tone([523,659,784,1047],.09),sWin=()=>tone([523,659,784,1047,1319,1568],.11);
+
+/* ---------- Konfetti ---------- */
+const cv=$("#fx"),cx=cv.getContext("2d");let parts=[],anim=0;
+function burst(n=120,x=innerWidth/2,y=innerHeight/3){if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;const cols=["#ffb627","#ff4d5a","#2fbf71","#7fd3f7","#ffffff"];for(let i=0;i<n;i++)parts.push({x,y,vx:(Math.random()-.5)*14,vy:Math.random()*-12-3,s:R(6,11),c:pick(cols),r:Math.random()*6,l:R(60,110)});if(!anim)loop()}
+function loop(){cv.width=innerWidth;cv.height=innerHeight;cx.clearRect(0,0,cv.width,cv.height);parts=parts.filter(p=>p.l-->0);parts.forEach(p=>{p.vy+=.35;p.x+=p.vx;p.y+=p.vy;p.r+=.2;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);cx.restore()});anim=parts.length?requestAnimationFrame(loop):0;if(!anim)cx.clearRect(0,0,cv.width,cv.height)}
+
+/* ---------- Berg ---------- */
+const trail=$("#trail"),TL=trail.getTotalLength();
+function climb(f,label,flagLabel){f=Math.max(0,Math.min(1,f));const p=trail.getPointAtLength(TL*f);$("#climber").setAttribute("transform",`translate(${p.x} ${p.y})`);const t=$("#climbT");t.textContent=label||"";t.setAttribute("x",p.x+(p.x>700?-24-t.getComputedTextLength():18));t.setAttribute("y",p.y-16);$("#flagT").textContent=flagLabel||""}
+
+/* ---------- Startseite ---------- */
+const P=()=>cur&&S.players[cur];
+function renderStart(){
+ const ids=Object.keys(S.players).sort((a,b)=>S.players[a].name.localeCompare(S.players[b].name));
+ $("#players").innerHTML=ids.length?ids.map(id=>`<button class="chip ${id===cur?"on":""}" data-p="${esc(id)}">${esc(S.players[id].name)}</button>`).join(""):`<span class="mute">Schreib zuerst deinen Namen.</span>`;
+ $("#modes").innerHTML=MODES.map(m=>`<button class="mode ${m.id===mode?"on":""}" data-m="${m.id}"><b>${m.name}</b><span class="ex">${m.ex}</span><span>${m.desc}</span></button>`).join("");
+ $("#durs").innerHTML=[10,20,30].map(d=>`<button class="chip ${d===dur?"on":""}" data-d="${d}">${d} Aufgaben</button>`).join("");
+ const p=P(),xp=p?p.xp:0,ri=rankOf(xp),nx=RANKS[ri+1];
+ const within=nx?(xp-RANKS[ri][0])/(nx[0]-RANKS[ri][0]):1;
+ $("#rankCard").innerHTML=p?`<div class="rank"><div class="badge">${ri+1}</div><div class="grow"><h2>${esc(RANKS[ri][1])}</h2><div class="mute">${esc(p.name)} · insgesamt ${fmt(xp)} Höhenmeter · ${p.games||0} Touren</div>
+  <div class="prog"><i style="width:${Math.round(within*100)}%"></i></div><div class="mute">${nx?`Noch ${fmt(nx[0]-xp)} m bis „${nx[1]}“`:"Höchster Rang erreicht!"}</div></div></div>
+  <h3>Abzeichen</h3><div class="badges">${BADGES.map(b=>`<span class="bdg ${(p.badges||[]).includes(b[0])?"got":""}">${b[1]}</span>`).join("")}</div>`
+  :`<h2>Dein Rang</h2><p class="mute">Wähle einen Kletterer oder leg einen neuen an. Mit jeder Tour steigst du auf: vom Wanderer bis zur Zahlen-Legende.</p>`;
+ climb((ri+within)/(RANKS.length-1),p?RANKS[ri][1]:"",p&&p.best&&p.best[mode+"_"+dur]?`Rekord ${fmt(p.best[mode+"_"+dur])} m`:"");
+ renderBoard();
+}
+function renderBoard(){
+ const tabs=[...MODES.map(m=>[m.id,m.name]),["rang","Ränge"]];
+ $("#bN").textContent=tab==="rang"?"":`· ${dur} Aufgaben`;$("#tabs").innerHTML=tabs.map(t=>`<button class="tab ${t[0]===tab?"on":""}" data-t="${t[0]}">${t[1]}</button>`).join("");
+ const med=i=>i<3?`<span class="medal" style="background:${["#ffcf3f","#d5dde5","#e2a06b"][i]}">${i+1}</span>`:`<span class="mute">${i+1}.</span>`;
+ let rows;
+ if(tab==="rang"){rows=Object.entries(S.players).sort((a,b)=>b[1].xp-a[1].xp).slice(0,10).map(([id,p],i)=>`<tr class="${id===cur?"me":""}"><td class="m">${med(i)}</td><td>${esc(p.name)}<br><span class="mute">${RANKS[rankOf(p.xp)][1]}</span></td><td class="n">${fmt(p.xp)} m</td></tr>`)}
+ else{const best={};S.scores.filter(s=>s.mode===tab&&s.n===dur).forEach(s=>{if(!best[s.pid]||s.score>best[s.pid].score)best[s.pid]=s});
+  rows=Object.values(best).sort((a,b)=>b.score-a.score).slice(0,10).map((s,i)=>`<tr class="${s.pid===cur?"me":""}"><td class="m">${med(i)}</td><td>${esc(s.name)}<br><span class="mute">${s.correct}/${s.n} gleich richtig · ${s.secs?mmss(s.secs):""} · ${new Date(s.at).toLocaleDateString("de-DE")}</span></td><td class="n">${fmt(s.score)} m</td></tr>`)}
+ $("#board").innerHTML=rows.length?`<table>${rows.join("")}</table>`:`<p class="mute">Noch keine Touren auf dieser Route. Sei der Erste!</p>`;
+}
+$("#sStart").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+ if(b.dataset.p){cur=b.dataset.p;saveLocal()}else if(b.dataset.m){mode=b.dataset.m;tab=mode}else if(b.dataset.d){dur=+b.dataset.d}else if(b.dataset.t){tab=b.dataset.t}else return;renderStart()});
+$("#addF").addEventListener("submit",e=>{e.preventDefault();const n=$("#addN").value.trim().slice(0,16);if(!n)return;
+ const ex=Object.keys(S.players).find(id=>S.players[id].name.toLowerCase()===n.toLowerCase());
+ if(ex)cur=ex;else{cur="p"+Date.now().toString(36)+R(100,999);S.players[cur]={name:n,xp:0,games:0,best:{},badges:[],played:[]};savePlayer(cur)}
+ $("#addN").value="";saveLocal();renderStart()});
+$("#snd").addEventListener("click",()=>{sound=!sound;$("#snd").textContent=sound?"Ton an":"Ton aus";$("#snd").setAttribute("aria-pressed",sound)});
+
+/* ---------- Aufgabenpool ohne Wiederholung ---------- */
+let SEEN=[];try{SEEN=JSON.parse(localStorage.getItem("gipfelSeen")||"[]")}catch(e){}
+const seenSet=new Set(SEEN);
+function gen(m){let t;for(let i=0;i<30;i++){t=m.gen();if(!seenSet.has(t.t))break}
+ seenSet.add(t.t);SEEN.push(t.t);if(SEEN.length>1500)seenSet.delete(SEEN.shift());try{localStorage.setItem("gipfelSeen",JSON.stringify(SEEN))}catch(e){}return t}
+/* ---------- Spiel ---------- */
+let G=null;
+const KEY=()=>mode+"_"+dur;
+const show=id=>{document.querySelectorAll(".screen").forEach(s=>s.classList.toggle("on",s.id===id));$("#hud").style.display=id==="sPlay"?"flex":"none";document.body.classList.toggle("playing",id==="sPlay");scrollTo({top:0})};
+$("#pad").innerHTML=["1","2","3","4","5","6","7","8","9","⌫","0","OK"].map(k=>`<button data-k="${k}" class="${k==="OK"?"ok":k==="⌫"?"del":""}" aria-label="${k==="⌫"?"Löschen":k}">${k}</button>`).join("");
+$("#go").addEventListener("click",()=>{
+ if(!P()){$("#addN").focus();$("#players").classList.add("shake");setTimeout(()=>$("#players").classList.remove("shake"),400);return}
+ tone([440],.01,"sine",.001);
+ G={m:MODES.find(x=>x.id===mode),n:dur,done:0,score:0,streak:0,maxStreak:0,correct:0,input:"",wrong:[],fast:0,lock:false,fix:0,start:performance.now()};
+ show("sPlay");hud();next()});
+function next(){G.task=gen(G.m);G.input="";G.t0=performance.now();G.lock=false;$("#wrong").style.display="none";$("#wrong").style.background="";drawTask()}
+function drawTask(){$("#task").innerHTML=esc(G.task.t).split(Q).join(`<span class="ans">${esc(G.input?fmt(G.input):"")}</span>`);$("#hint").textContent="Tipp: "+G.task.hint}
+function hud(){$("#hTime").textContent=`${Math.min(G.done+1,G.n)} / ${G.n}`;$("#hScore").textContent=fmt(G.score)+" m";$("#hStreak").textContent=G.streak;
+ const mult=G.streak>=10?3:G.streak>=5?2:1;$("#combo").textContent=mult>1?`Serie ${G.streak} – Punkte ×${mult}!`:"";
+ const p=P(),rec=p.best&&p.best[KEY()];climb(G.done/G.n,fmt(G.score)+" m",rec?`Rekord ${fmt(rec)} m`:"Gipfel")}
+function key(k){if(!G||G.lock)return;if(k==="⌫")G.input=G.input.slice(0,-1);else if(k==="OK"){submit();return}else if(G.input.length<6)G.input=(G.input+k).replace(/^0+(?=\d)/,"");drawTask()}
+$("#pad").addEventListener("click",e=>{const b=e.target.closest("button");if(b)key(b.dataset.k)});
+document.addEventListener("keydown",e=>{if(!$("#sPlay").classList.contains("on"))return;if(/^\d$/.test(e.key))key(e.key);else if(e.key==="Backspace")key("⌫");else if(e.key==="Enter"){e.preventDefault();key("OK")}});
+function step1(){G.done++;hud();if(G.done>=G.n){G.lock=true;sWin();burst(160);setTimeout(finish,900)}else next()}
+function submit(){if(G.input==="")return;const v=parseInt(G.input,10);if(G.fix){fixAnswer(v);return}const dt=(performance.now()-G.t0)/1000;
+ if(v===G.task.ans){G.streak++;G.maxStreak=Math.max(G.maxStreak,G.streak);G.correct++;if(dt<3)G.fast++;
+  const mult=G.streak>=10?3:G.streak>=5?2:1,pts=(G.m.base+(dt<4?5:dt<8?2:0))*mult;G.score+=pts;
+  const f=document.createElement("div");f.className="float";f.textContent=`+${pts} m`;$("#fb").appendChild(f);setTimeout(()=>f.remove(),1000);
+  if(G.streak%5===0){sCombo();burst(60)}else sGood();
+  step1()}
+ else{G.streak=0;G.wrong.push({t:G.task.t.replace(Q,fmt(G.task.ans)),g:v,fixed:false});sBad();G.fix=1;G.input="";
+  $("#task").classList.add("shake");setTimeout(()=>$("#task").classList.remove("shake"),400);
+  wbox(`Du hast <b>${esc(fmt(v))}</b> geschrieben – das stimmt noch nicht.<br>Schau genau hin und berichtige!`);hud();drawTask()}}
+function fixAnswer(v){const w=G.wrong[G.wrong.length-1];
+ if(v===G.task.ans){w.fixed=G.fix===1;G.lock=true;sGood();wbox(G.fix===1?"<b>Super, selbst berichtigt!</b> Weiter geht's …":"<b>Genau so.</b> Weiter geht's …",true);
+  setTimeout(()=>{if(!G)return;G.fix=0;step1()},1100)}
+ else if(G.fix===1){G.fix=2;G.input="";sBad();wbox(`Leider noch nicht. Richtig ist <b>${esc(fmt(G.task.ans))}</b>.<br>Tippe die Lösung ab, dann geht's weiter.`);drawTask()}
+ else{G.input="";sBad();$("#task").classList.add("shake");setTimeout(()=>$("#task").classList.remove("shake"),400);drawTask()}}
+function wbox(h,good){const b=$("#wrong");b.innerHTML=h;b.style.display="block";b.style.background=good?"color-mix(in srgb,var(--good) 22%,var(--card))":""}
+$("#quit").addEventListener("click",()=>{G=null;show("sStart");renderStart()});
+const mmss=s=>`${Math.floor(s/60)}:${String(Math.round(s%60)).padStart(2,"0")}`;
+
+function finish(){if(!G)return;const g=G;G=null;const p=P(),id=cur,k=mode+"_"+g.n,secs=Math.round((performance.now()-g.start)/1000);
+ const acc=Math.round(g.correct/g.n*100),stars=acc>=90?3:acc>=70?2:1;
+ const oldBest=(p.best&&p.best[k])||0,isRec=g.score>oldBest&&g.score>0,ri0=rankOf(p.xp);
+ p.best={...(p.best||{})};if(isRec)p.best[k]=g.score;p.xp=(p.xp||0)+g.score;p.games=(p.games||0)+1;p.played=[...new Set([...(p.played||[]),mode])];
+ const had=new Set(p.badges||[]),nb=[];const give=b=>{if(!had.has(b)){had.add(b);nb.push(b)}};
+ give("first");if(g.maxStreak>=10)give("s10");if(g.maxStreak>=20)give("s20");if(acc===100&&g.n>=10)give("perfect");if(g.fast>=5)give("blitz");
+ if(MODES.every(m=>p.played.includes(m.id)))give("all");if(isRec&&oldBest>0)give("record");if(g.score>=1000)give("k1000");p.badges=[...had];
+ const ri1=rankOf(p.xp);savePlayer(id);saveScore({pid:id,name:p.name,mode,score:g.score,correct:g.correct,n:g.n,secs,at:Date.now()});
+ $("#resBox").innerHTML=`<h2>Gipfel erreicht!</h2><div class="stars">${[0,1,2].map(i=>i<stars?`<span class="s" style="animation-delay:${i*.25}s">★</span>`:"★").join("")}</div>
+  <div class="big">${fmt(g.score)} m</div><div class="mute">${esc(p.name)} auf der Route „${g.m.name}“ · ${g.n} Aufgaben</div>
+  ${isRec?`<div class="banner">${oldBest?`Neuer Rekord! Vorher ${fmt(oldBest)} m`:"Erster Gipfel auf dieser Route!"}</div>`:""}
+  ${ri1>ri0?`<div class="banner" style="background:var(--good);color:#fff">Aufgestiegen: Du bist jetzt ${RANKS[ri1][1]}!</div>`:""}
+  ${nb.length?`<div class="banner" style="background:var(--rock);color:#fff">Neues Abzeichen: ${nb.map(b=>BADGES.find(x=>x[0]===b)[1]).join(", ")}</div>`:""}
+  <div class="stats"><div class="stat"><b>${g.correct}/${g.n}</b>gleich richtig</div><div class="stat"><b>${acc} %</b>Treffer</div><div class="stat"><b>${g.maxStreak}</b>beste Serie</div><div class="stat"><b>${mmss(secs)}</b>gebraucht</div></div>
+  ${g.wrong.length?`<h3>Das üben wir noch</h3><ul class="wl">${g.wrong.slice(0,10).map(w=>`<li>${esc(w.t)} <span class="mute">(du: ${fmt(w.g)}${w.fixed?" – selbst berichtigt ✓":""})</span></li>`).join("")}</ul>`:`<p><b>Keine Fehler – stark!</b></p>`}
+  <div class="row"><button class="b1" id="again">Noch eine Tour</button><button class="b2" id="menu">Zur Basis</button></div>`;
+ show("sRes");climb(1,fmt(g.score)+" m",Math.max(oldBest,g.score)?`Rekord ${fmt(Math.max(oldBest,g.score))} m`:"Gipfel");
+ if(isRec||ri1>ri0){sWin();burst(200);setTimeout(()=>burst(140,innerWidth*.25),500);setTimeout(()=>burst(140,innerWidth*.75),900)}else{burst(90)}
+ $("#again").addEventListener("click",()=>$("#go").click());$("#menu").addEventListener("click",()=>{show("sStart");renderStart()})}
+
+renderStart();connect();
+}
+</script>
+</body>
+</html>
